@@ -27,18 +27,18 @@ font = ImageFont.truetype(font_path, font_size)
 os.system('cls' if os.name == 'nt' else 'clear')
 
 def setup():
-    pass
+    for ascii_char in ascii_chars:
+        char_image = Image.new('RGB', (font_size, font_size), color=(30, 30, 30))
+        char_draw = ImageDraw.Draw(char_image)
+        char_draw.text((0, 0), ascii_char, font=font, fill=(250, 250, 250))
+        ascii_chars_images.append(char_image)
 
 def segment_image_to_ascii(segment, block_size, ascii_chars, index):
-    start_time = time.time()
     h, w, _ = segment.shape
-    ascii_art = "\n".join([" ".join([ascii_chars[int(np.mean(segment[i:i+block_size, j:j+block_size])/255*(len(ascii_chars)-1))] for j in range(0, w, block_size)]) for i in range(0, h, block_size)])
-    end_time = time.time()
-    print(Fore.YELLOW + f"Segmentation en ASCII {index}: {end_time - start_time} secondes")
+    ascii_art = "\n".join(["0".join([str(int(np.mean(segment[i:i+block_size, j:j+block_size])/255*(len(ascii_chars)-1))) for j in range(0, w, block_size)]) for i in range(0, h, block_size)])
     return index, ascii_art
 
 def segment_ascii_to_image(segment, index):
-    start_time = time.time()
     lines = segment.split('\n')
     lines = [line.strip() for line in lines if line.strip()]  # Supprimer les lignes vides
 
@@ -50,26 +50,24 @@ def segment_ascii_to_image(segment, index):
     draw = ImageDraw.Draw(image)
 
     # Dessiner le texte ASCII sur l'image
+    x = 0
     y = 0
     for line in lines:
-        draw.text((0, y), line, font=font, fill=(250, 250, 250))
-        y += font_size
+        for char in line:
+            char_image = ascii_chars_images[int(char)]
+            image.paste(char_image, (x, y))
+            x += font_size
+            y += font_size
 
-    end_time = time.time()
-    print(Fore.BLUE + f"Conversion ASCII en image {index}: {end_time - start_time} secondes")
     return index, image
 
 
 def segment_image_to_ascii_image(segment, block_size, ascii_chars, index):
-    start_time = time.time()
     _, ascii_segment = segment_image_to_ascii(segment, block_size, ascii_chars, index)
     _, image_segment = segment_ascii_to_image(ascii_segment, index)
-    end_time = time.time()
-    print(Fore.RED + f"Segmentation d'image en ASCII et conversion en image {index}: {end_time - start_time} secondes")
     return index, image_segment
 
 def process_image_to_ascii_image(image, block_size, ascii_chars):
-    start_time = time.time()
     h, w, _ = image.shape
     segment_height = h // num_threads
 
@@ -94,14 +92,13 @@ def process_image_to_ascii_image(image, block_size, ascii_chars):
         combined_image.paste(img, (0, y_offset))
         y_offset += img.height
 
-    end_time = time.time()
-    print(Fore.GREEN + f"Traitement complet de l'image: {end_time - start_time} secondes" + Fore.RESET)
-
     return combined_image
 
 # Créer une webcam virtuelle avec pyvirtualcam
 with pyvirtualcam.Camera(width=2560, height=1940, fps=20, fmt=PixelFormat.BGR) as cam:
     print(f'Utilisation de la caméra virtuelle : {cam.device} ({cam.width}x{cam.height} @ {cam.fps}fps)')
+
+    setup()
 
     while True:
         start_time = time.time()
@@ -124,4 +121,3 @@ with pyvirtualcam.Camera(width=2560, height=1940, fps=20, fmt=PixelFormat.BGR) a
         fps = 1 / (end_time - start_time)
 
         print(f"FPS: {fps:.2f}")
-        break
