@@ -1,43 +1,42 @@
-from PIL import Image, ImageDraw, ImageFont
-import time
+import cv2
 import numpy as np
-
+import os
+import time
+from PIL import Image, ImageDraw, ImageFont
+import pyvirtualcam
+from pyvirtualcam import PixelFormat
+import concurrent.futures
+from colorama import Fore, Back, Style, init
 
 font_size = 20  # Ajuster pour changer la taille de la police
 ascii_chars = " .:-=+*#%@8&WM"
-ascii_chars_images = []
+ascii_chars_images = {}
 font_path = "Consolas.ttf"
-test_number = 500
+
+num_threads = 10
 
 # Charger une police de caractères monospacée
 font = ImageFont.truetype(font_path, font_size)
 
+# Effacer le terminal une seule fois avant la boucle principale
+os.system('cls' if os.name == 'nt' else 'clear')
 
-start_time = time.time()
-# Créer une nouvelle image
-image = Image.new('RGB', (font_size*test_number, font_size*test_number), color=(30, 30, 30))
-draw = ImageDraw.Draw(image)
+def setup():
+    for ascii_char in ascii_chars:
+        char_image = Image.new('RGB', (font_size, font_size), color=(30, 30, 30))
+        char_draw = ImageDraw.Draw(char_image)
+        char_draw.text((0, 0), ascii_char, font=font, fill=(250, 250, 250))
+        ascii_chars_images[ascii_char] = char_image
+    
+setup()
 
-for i in range(test_number):
-    for j in range(test_number):        
-        draw.text((i*font_size, j*font_size), '@', font=font, fill=(250, 250, 250))
+print(ascii_chars_images)
 
-end_time = time.time()
-print(f"Conversion ASCII en image test 1: {end_time - start_time} secondes")
+# créer une image qui contient toute les images des caractères
+image = Image.new('RGB', (font_size * len(ascii_chars), font_size), color=(30, 30, 30))
+x = 0
+for ascii_char, char_image in ascii_chars_images.items():
+    image.paste(char_image, (x, 0))
+    x += font_size
 
-# Créer une nouvelle image
-
-start_time = time.time()
-char_image = Image.new('RGB', (font_size, font_size), color=(30, 30, 30))
-char_draw = ImageDraw.Draw(char_image)
-char_draw.text((0, 0), '@', font=font, fill=(250, 250, 250))
-
-image2 = Image.new('RGB', (font_size*test_number, font_size*test_number), color=(30, 30, 30))
-draw2 = ImageDraw.Draw(image2)
-
-for i in range(test_number):
-    for j in range(test_number):        
-        image2.paste(char_image, (i * font_size, j * font_size))
-
-end_time = time.time()
-print(f"Conversion ASCII en image test 2: {end_time - start_time} secondes")
+image.show()
