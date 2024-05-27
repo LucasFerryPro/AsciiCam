@@ -30,7 +30,7 @@ Additionally, you need the Consolas.ttf font file in the same directory as the s
 4. Run the script using the following command:
 
     ```bash
-    python ascii_art_virtual_camera.py
+    python3 asciiCam.py
     ```
 
 ### Key Components
