@@ -7,7 +7,7 @@ This project captures frames from a real camera, converts them into ASCII art, a
 Before running the program, ensure you have the following installed:
 
 - Python 3.6 or later
-- OBS Studio 30.1.2
+- OBS Studio 30.1.2 or later
 - Required Python libraries:
   - `opencv-python`
   - `numpy`
