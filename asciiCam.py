@@ -166,8 +166,8 @@ with pyvirtualcam.Camera(width=1280, height=720, fps=60, fmt=PixelFormat.BGR) as
     target_size = (cam.width, cam.height)
 
     # Create queues to hold the frames and processing times
-    frame_queue = queue.Queue()
-    fps_queue = queue.Queue()
+    frame_queue = queue.Queue(5)
+    fps_queue = queue.Queue(5)
 
     # Create an event to signal the threads to stop
     stop_event = threading.Event()
